@@ -6,11 +6,97 @@
 	width: 800px;
 }
 
+.main {
+    display: inline-block;
+    width: 65%;
+    min-height: 600px;
+    background-color: cadetblue;
+}
+
+.options {
+    float: right;
+    padding-top: 10px;
+    width: 35%;
+    min-height: 600px;
+    /* background-color: chocolate; */
+}
+
+.options h5 {
+    font-weight: 600;
+    display: inline-block;
+    width: 35%;
+    text-align: right;
+}
+
+.option_radio {
+    width: 60%;
+    float: right;
+}
+
+.options_tool {
+    clear: both;
+    height: 85%;
+    width: 100%;
+    margin: auto;
+}
+
+.permutaion_tool {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: darksalmon;
+}
+
+.permutaion_tool svg {
+    position: absolute;
+    width: 80%;
+    margin-left: 10%;
+}
+
+.permutaion_tool svg circle {
+    fill: none;
+    stroke: dimgray;
+}
+
+.permutaion_tool .connects_lines line {
+    stroke: dimgray;
+}
+
+.box_item .connects_lines line {
+    stroke: #000000;
+}
 
 
+.permutaion_tool svg circle.circle_filled {
+    fill: #888888;
+}
 
+.box_item svg circle.circle_filled {
+    fill: #5e5e5e;
+    stroke: #000;
+}
 
+.box_item svg circle {
+    fill: none;
+    stroke: rgb(36, 36, 36);
+}
 
+.box_item svg rect {
+    fill: #d5d5d5;
+    stroke: #797979;
+}
+
+.box_item {
+    float: left;
+    width: 40%;
+    min-height: 50px;
+    margin-top: 5px;
+}
+
+.box_item:nth-child(odd) {
+    margin-right: 10%;
+    margin-left: 10%;
+}
 
 
 

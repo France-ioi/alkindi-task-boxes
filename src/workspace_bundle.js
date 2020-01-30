@@ -20,6 +20,7 @@ class Workspace extends React.PureComponent {
 
     return (
       <div>
+        <h4>{'Transformation'}</h4>
         <Transformation />
       </div>
     );
