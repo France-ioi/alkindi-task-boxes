@@ -1,147 +1,210 @@
 #container {
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-	width: 800px;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  width: 800px;
 }
 
 .main {
-    display: inline-block;
-    width: 65%;
-    min-height: 600px;
-    background-color: cadetblue;
+  display: inline-block;
+  width: 65%;
+  min-height: 600px;
+}
+
+.titles {
+  position: relative;
+  width: 100%;
+  height: 35px;
+  text-align: center;
+}
+
+
+#main_svg_wrapper {
+  display: block;
+  margin-top: 50px;
+}
+
+#main_svg_wrapper svg {
+  background-color: #fff;
+}
+
+.main svg.arrow_svg {
+  background-color: rgb(240, 253, 216);
+}
+
+.main svg circle {
+  background-color: #d5d5d5;
+}
+
+.main svg circle {
+  fill: none;
+  stroke: dimgray;
+}
+
+.main svg rect.main_rect {
+  fill: none;
+  stroke: #000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.main .paths path {
+  stroke: dimgray;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.main .paths path.highlighted {
+  stroke: rgb(0, 0, 0);
+  stroke-width: 2;
+}
+
+.main svg rect.main_rect:hover {
+  fill: rgba(135, 135, 245, 0.459);
+  stroke: #6a6aeb;
+  stroke-width: 2;
+}
+
+.main svg rect.main_rect.selected {
+  fill: rgba(106, 106, 233, 0.63);
+  stroke: #0000e9;
+  stroke-width: 2;
+}
+
+.main svg rect.boxes_rect {
+  fill: #d5d5d5;
+  stroke: #797979;
+}
+
+.main .paths line {
+  stroke: dimgray;
 }
 
 .options {
-    float: right;
-    padding-top: 10px;
-    width: 35%;
-    min-height: 600px;
-    /* background-color: chocolate; */
+  float: right;
+  padding-top: 10px;
+  width: 35%;
+  min-height: 600px;
+  /* background-color: chocolate; */
 }
 
 .options h5 {
-    font-weight: 600;
-    display: inline-block;
-    width: 35%;
-    text-align: right;
+  font-weight: 600;
+  display: inline-block;
+  width: 35%;
+  text-align: right;
 }
 
 .option_radio {
-    width: 60%;
-    float: right;
+  width: 60%;
+  float: right;
 }
 
 .options_tool {
-    clear: both;
-    height: 85%;
-    width: 100%;
-    margin: auto;
+  clear: both;
+  height: 85%;
+  width: 100%;
+  margin: auto;
 }
 
 .permutaion_tool {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: darksalmon;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: darksalmon;
 }
 
 .permutaion_tool svg {
-    position: absolute;
-    width: 80%;
-    margin-left: 10%;
+  position: absolute;
+  width: 80%;
+  margin-left: 10%;
 }
 
 .permutaion_tool svg circle {
-    fill: none;
-    stroke: dimgray;
+  fill: none;
+  stroke: dimgray;
 }
 
 .permutaion_tool .connects_lines line {
-    stroke: dimgray;
+  stroke: dimgray;
 }
 
 .box_item .connects_lines line {
-    stroke: #000000;
+  stroke: #000000;
 }
 
-
 .permutaion_tool svg circle.circle_filled {
-    fill: #888888;
+  fill: #888888;
 }
 
 .box_item svg circle.circle_filled {
-    fill: #5e5e5e;
-    stroke: #000;
+  fill: #5e5e5e;
+  stroke: #000;
 }
 
 .box_item svg circle {
-    fill: none;
-    stroke: rgb(36, 36, 36);
+  fill: none;
+  stroke: rgb(36, 36, 36);
 }
 
 .box_item svg rect {
-    fill: #d5d5d5;
-    stroke: #797979;
+  fill: #d5d5d5;
+  stroke: #797979;
 }
 
 .box_item {
-    float: left;
-    width: 40%;
-    min-height: 50px;
-    margin-top: 5px;
+  float: left;
+  width: 40%;
+  min-height: 50px;
+  margin-top: 5px;
 }
 
 .box_item:nth-child(odd) {
-    margin-right: 10%;
-    margin-left: 10%;
+  margin-right: 10%;
+  margin-left: 10%;
 }
-
-
-
 
 .taskInstructions {
-    text-align: justify;
+  text-align: justify;
 }
 .taskInstructions table.pre {
-    margin: 10px auto;
+  margin: 10px auto;
 }
 .taskInstructions table.pre td {
-    padding: 4px 10px;
+  padding: 4px 10px;
 }
 .taskInstructions .list-unstyled {
-    padding-left: 30px;
+  padding-left: 30px;
 }
 .text-bold {
-    font-weight: bold;
+  font-weight: bold;
 }
 .taskWrapper .taskInstructions {
-    padding-top: 30px;
-    position: relative;
+  padding-top: 30px;
+  position: relative;
 }
 .topPlainWordContainer {
-    margin: 10px 20px;
-    height: 34px;
+  margin: 10px 20px;
+  height: 34px;
 }
 .topPlainWord {
-    font-family: Lucida Console,Monaco,monospace;
-    font-size: 18px;
-    display: inline-block;
-    margin-right: 20px;
-    background-color: #fff;
-    border: 1px solid #777;
-    box-shadow: 3px 2px 3px #ccc;
-    line-height: 27px;
-    letter-spacing: 10px;
-    padding-left: 5px;
+  font-family: Lucida Console, Monaco, monospace;
+  font-size: 18px;
+  display: inline-block;
+  margin-right: 20px;
+  background-color: #fff;
+  border: 1px solid #777;
+  box-shadow: 3px 2px 3px #ccc;
+  line-height: 27px;
+  letter-spacing: 10px;
+  padding-left: 5px;
 }
 
-
-
 .inputError {
-    border-color: red;
-    box-shadow: 0 0 3px red inset;
+  border-color: red;
+  box-shadow: 0 0 3px red inset;
 }
 /* .selectText {
     position: absolute;
@@ -164,22 +227,22 @@
 .selectText-columns .selectTextInner > span {
     left: -1px;
 } */
-.submitBlock, .scoreBlock, .feedbackBlock, .saveBlock {
-    display: inline-block;
-    line-height: 34px;
-    margin: 0 10px 0 0;
+.submitBlock,
+.scoreBlock,
+.feedbackBlock,
+.saveBlock {
+  display: inline-block;
+  line-height: 34px;
+  margin: 0 10px 0 0;
 }
 .taskHeader > *:last-child {
-    margin: 0;
+  margin: 0;
 }
-.scoreBlock, .feedbackBlock {
-    background: #f8f8f8;
-    padding: 0 8px;
+.scoreBlock,
+.feedbackBlock {
+  background: #f8f8f8;
+  padding: 0 8px;
 }
 .feedbackBlock {
-    cursor: pointer;
+  cursor: pointer;
 }
-
-
-
-

@@ -125,11 +125,6 @@ export default class PermutaionTool extends React.PureComponent {
   constructor (props) {
     super(props);
     this.config = makePermutationSvgCordinations(props.bits);
-    if ('data' in props) {
-      this.state.permutation = props.data;
-    } else {
-      this.state.permutation = range(0, props.bits);
-    }
   }
 
   render () {
@@ -146,8 +141,7 @@ export default class PermutaionTool extends React.PureComponent {
       circleOutputs[output] = React.cloneElement(circleOutputs[output], {className: 'circle_filled'});
     }
 
-    const perm_lines = getPermLines(this.state.permutation);
-
+    const perm_lines = getPermLines(this.props.data);
 
     return (
       <div className="permutaion_tool">
@@ -165,20 +159,21 @@ export default class PermutaionTool extends React.PureComponent {
 
   componentDidUpdate () {
     const {select: {input, output}} = this.state;
+    const {data, onDataChanged} = this.props;
+
     const isInput = input !== -1;
     const isOutput = output !== -1;
     if (isInput && isOutput) {
-
+      [data[data.indexOf(output)], data[input]] = [data[input], data[data.indexOf(output)]];
       setTimeout(() => {
-        this.setState(function ({permutation}) {
-          [permutation[permutation.indexOf(output)], permutation[input]] = [permutation[input], permutation[permutation.indexOf(output)]];
+        this.setState(function () {
           return {
             select: {
               input: -1,
               output: -1,
-            }, permutation: [...permutation]
+            }
           };
-        });
+        }, () => onDataChanged([...data]));
       }, 300);
     }
   }

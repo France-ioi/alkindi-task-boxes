@@ -149,15 +149,13 @@ export default class BoxesTool extends React.Component {
   constructor (props) {
     super(props);
 
-    this.state = {
-      data: props.data || range(0, 8).map(v => [v, 0])
-    };
-
     this.config = makeBoxSvgs(3);
   }
 
+
+
   render () {
-    const {data} = this.state;
+    const {data} = this.props;
     return (
       <div>
         {
@@ -170,8 +168,9 @@ export default class BoxesTool extends React.Component {
   }
 
   onBoxUpdate = ([input, output]) => {
-    this.setState(function (state) {
-      return update(state, {data: {$splice: [[input, 1, [input, output]]]}});
-    });
+    const {data, onDataChanged} = this.props;
+    const newData = update(data, {$splice: [[input, 1, [input, output]]]});
+    onDataChanged(newData);
+
   }
 }

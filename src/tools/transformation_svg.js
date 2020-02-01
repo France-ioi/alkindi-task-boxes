@@ -1,0 +1,164 @@
+import React from 'react';
+import classnames from 'classnames';
+
+
+function makePermutationLines ({config, index, data}) {
+  const dataLines = [];
+  const {
+    rect,
+    x_pos,
+    y_pos,
+  } = config;
+
+  const [start, end] = x_pos[index];
+  const x1 = start + 1;
+  const x2 = x1 + rect.width - 2;
+  const x3 = end;
+
+  for (let i = 0; i < y_pos.length; i++) {
+    const y1 = y_pos[i];
+    const y2 = y_pos[data[i]];
+    const y3 = y2;
+    dataLines.push(<path
+      key={i}
+      d={`M ${x1 - 1} ${y1} L ${x1} ${y1}  L ${x2} ${y2} L ${x3} ${y3} `}
+    />);
+
+  }
+
+  return dataLines;
+}
+
+function makeBoxesLines ({config, index, _data}) {
+  const {
+    bits,
+    box_extra,
+    x_pos,
+    y_pos,
+  } = config;
+
+  const [start, end] = x_pos[index];
+  const input_x1 = start;
+  const input_x2 = start + box_extra + 1;
+
+  const output_x2 = end;
+  const output_x1 = input_x2 + 10;
+
+  const dataLines = new Array(2 * bits);
+
+  for (let i = 0; i < bits; i++) {
+    const connect_y = y_pos[i];
+
+    dataLines[i] = <line
+      key={i}
+      x1={input_x1}
+      y1={connect_y}
+      x2={input_x2}
+      y2={connect_y} />;
+
+    dataLines[i + bits] = <line
+      key={i + bits}
+      x1={output_x1}
+      y1={connect_y}
+      x2={output_x2}
+      y2={connect_y} />;
+  }
+
+  return dataLines;
+}
+
+function makeSvg (config, index, type) {
+
+  const {
+    box_extra,
+    box_rects,
+    x_pos,
+  } = config;
+
+  let {
+    rect
+  } = config;
+
+  const [start] = x_pos[index];
+
+  rect = {...rect, x: start};
+
+  let boxesSvgs = null;
+  if (type !== 'permutation') {
+    boxesSvgs = [];
+    for (let i = 0; i < box_rects.length; i++) {
+      boxesSvgs.push(<rect
+        key={i}
+        className="boxes_rect"
+        x={start + box_extra}
+        {...box_rects[i]}
+      />);
+    }
+  }
+
+  return {
+    rect,
+    boxesSvgs,
+  };
+}
+
+export default class TransformationSvg extends React.PureComponent {
+
+  constructor (props) {
+    super(props);
+    const {config, index, type} = this.props;
+    this.index = index;
+    this.type = type;
+    this.state = {
+      svgData: makeSvg(config, index, type),
+    };
+  }
+
+
+  render () {
+    let {rect, boxesSvgs} = this.state.svgData;
+    const {type, selected} = this.props;
+
+    let dataLines = null;
+    if (type === 'permutation') {
+      dataLines = makePermutationLines(this.props);
+    } else {
+      dataLines = makeBoxesLines(this.props);
+    }
+
+
+    return (
+      <g>
+        <g className="paths">{dataLines}</g>
+        {boxesSvgs}
+        <rect
+          className={classnames("main_rect", selected && 'selected')}
+          {...rect}
+          pointerEvents="visible"
+          onClick={this.onClicked}
+        />
+      </g>
+    );
+  }
+
+  onClicked = () => {
+    const {index, onSelectedChanged} = this.props;
+    onSelectedChanged(index - 2);
+  }
+
+  componentDidUpdate () {
+    // update svg data when props changes, if changes
+    this.setState((state) => {
+      const {config, index, type} = this.props;
+      if (this.index !== index || this.type !== type) {
+        this.index = index;
+        this.type = type;
+        return {
+          svgData: makeSvg(config, index, type),
+        };
+      }
+      return state;
+    });
+  }
+}
+
