@@ -74,7 +74,7 @@ function genRandomInput (rng, nbInputs) {
   return inputs;
 }
 
-export function computeWorstCase (transformations, permutations, boxes, selectedInput) {
+ function computeWorstCaseOld (transformations, permutations, boxes, selectedInput) {
   var nbAttempts = 200;
   var worstInputs = [];
   var nbInputs = permutations[0].length;
@@ -99,6 +99,34 @@ export function computeWorstCase (transformations, permutations, boxes, selected
   };
 }
 
+export function computeWorstCase (transformations, permutations, boxes, selectedInput) {
+  var nbAttempts = 200;
+  var nbInputs = permutations[0].length;
+  const rng0 = seedrandom(seed);
+  var scoreInputs = [];
+  for (var diffs = 0; diffs <= nbInputs; diffs++) {
+    scoreInputs[diffs] = {count: 0, inputs: [], impactedOutputs: []};
+  }
+  var totalDiffs = 0;
+  for (var iAttempt = 0; iAttempt < nbAttempts; iAttempt++) {
+    var inputs = genRandomInput(rng0, nbInputs);
+    var impact = computeImpact(transformations, permutations, boxes, inputs, selectedInput);
+    scoreInputs[impact.nbDiff].count++;
+    scoreInputs[impact.nbDiff].inputs = inputs;
+    scoreInputs[impact.nbDiff].impactedOutputs = impact.impactedOutputs;
+    totalDiffs += impact.nbDiff;
+  }
+  var avgDiffs = Math.floor(totalDiffs / nbAttempts);
+  while (scoreInputs[avgDiffs].count == 0) {
+    avgDiffs++;
+  }
+  return {
+    inputs: scoreInputs[avgDiffs].inputs,
+    impactedOutputs: scoreInputs[avgDiffs].impactedOutputs,
+    nbDiff: avgDiffs
+  };
+}
+
 export function computeScores (transformations, permutations, boxes) {
   var nbInputs = permutations[0].length;
   var scores = [];
@@ -112,4 +140,57 @@ export function computeScores (transformations, permutations, boxes) {
     }
   }
   return scores;
+}
+
+export function genRandomPermutation (nbInputs) {
+  var permutation = [];
+  var lockedInputs = [];
+  var lockedOutputs = [];
+  for (var iInput = 0; iInput < nbInputs; iInput++) {
+    permutation[iInput] = iInput;
+    lockedInputs[iInput] = false;
+    lockedOutputs[iInput] = false;
+  }
+  var startBox = Math.floor(Math.random() * nbInputs / 3);
+  var usedBoxes = [];
+
+  for (var box = 0; box < nbInputs / 3; box++) {
+    usedBoxes[box] = false;
+  }
+  for (var iBoxOutput = 0; iBoxOutput < 3; iBoxOutput++) {
+    let input = startBox * 3 + iBoxOutput;
+    let box = Math.floor(Math.random() * nbInputs / 3);
+    while (usedBoxes[box]) {
+      box = Math.floor(Math.random() * nbInputs / 3);
+    }
+    usedBoxes[box] = true;
+    var output = box * 3 + Math.floor(Math.random() * 3);
+    var prevOutput = permutation[input];
+    var prevInput = 0;
+    for (var curInput = 0; curInput < nbInputs; curInput++) {
+      if (permutation[curInput] == output) {
+        prevInput = curInput;
+      }
+    }
+    permutation[input] = output;
+    permutation[prevInput] = prevOutput;
+    lockedInputs[input] = true;
+    lockedOutputs[output] = true;
+  }
+  var invertedPermutation = [];
+  for (let iInput = 0; iInput < nbInputs; iInput++) {
+    invertedPermutation[permutation[iInput]] = iInput;
+  }
+  if (Math.random() < 0.5) {
+    return {
+      permutation: invertedPermutation,
+      lockedInputs: lockedOutputs,
+      lockedOutputs: lockedInputs
+    };
+  }
+  return {
+    permutation: permutation,
+    lockedInputs: lockedInputs,
+    lockedOutputs: lockedOutputs
+  };
 }
