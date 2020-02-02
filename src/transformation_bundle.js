@@ -103,7 +103,7 @@ function taskInitReducer (state) {
   const outputAffected = new Array(bits).fill(0);
 
   const scores = new Array(bits).fill(1);
-  const totalScore = 0;
+  const totalScore = 15;
   const inputMode = 'manual';
 
   return {
@@ -125,7 +125,7 @@ function taskInitReducer (state) {
 }
 
 function taskRefreshReducer (state) {
-  return {...state};
+  return updateScores(updateHighlights(state));
 }
 
 function transformTypeChangedReducer (state, {value}) {

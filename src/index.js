@@ -1,5 +1,4 @@
 
-import update from 'immutability-helper';
 import algoreaReactTask from './algorea_react_task';
 
 import 'font-awesome/css/font-awesome.css';
@@ -54,29 +53,57 @@ function appInitReducer (state, _action) {
 }
 
 function taskInitReducer (state, _action) {
- return {...state, taskReady: true};
+  return {...state, taskReady: true};
 }
 
 function taskRefreshReducer (state, _action) {
- return {...state};
+  return {...state};
 }
 
 function getTaskAnswer (state) {
+  const {
+    transformations,
+    permutation,
+    boxes,
+    inputs,
+    totalScore,
+  } = state;
   return {
-
+    transformTypes: transformations.map(t => t.type),
+    permutation,
+    boxes,
+    inputs,
+    totalScore,
   };
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
- return update(state, {});
+  const {
+    transformTypes,
+    permutation,
+    boxes,
+    inputs,
+  } = answer;
+
+  let {transformations} = state;
+  transformations = transformations.map((t, i) => ({...t, type: transformTypes[i]}));
+
+  return {
+    ...state, transformations,
+    permutation,
+    boxes,
+    inputs,
+  };
 }
 
 function getTaskState (state) {
-  return {};
+  const {arrow, selected, inputMode} = state;
+  return {arrow, selected, inputMode};
 }
 
 function taskStateLoaded (state, {payload: {dump}}) {
- return update(state, {});
+  const {arrow, selected, inputMode} = dump;
+  return {...state, arrow, selected, inputMode};
 }
 
 export function run (container, options) {
