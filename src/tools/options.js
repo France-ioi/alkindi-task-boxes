@@ -4,7 +4,8 @@ import BoxesTool from './boxes';
 
 export function OptionsToolSelector (state) {
   const {taskData: {bits}, actions: {transformDataChanged},
-  transformations, selected, permutation, boxes} = state;
+    transformations, selected, permutation, boxes, lockedInputs,
+    lockedOutputs} = state;
 
   const {type} = transformations[selected];
   let data = null;
@@ -19,18 +20,20 @@ export function OptionsToolSelector (state) {
     bits,
     type,
     data,
-    transformDataChanged
+    lockedInputs,
+    lockedOutputs,
+    transformDataChanged,
   };
 }
 
 export class OptionsToolView extends React.Component {
   render () {
-    const {bits, type, data} = this.props;
+    const {bits, type, data, lockedInputs, lockedOutputs} = this.props;
     return (
       <div className="options_tool">
         {
           type === 'permutation' ?
-            <PermutaionTool data={data} onDataChanged={this.onDataChanged} bits={bits} />
+            <PermutaionTool data={data} lockedInputs={lockedInputs} lockedOutputs={lockedOutputs} onDataChanged={this.onDataChanged} bits={bits} />
             : <BoxesTool data={data} onDataChanged={this.onDataChanged} />
         }
       </div>

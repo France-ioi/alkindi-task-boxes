@@ -1,11 +1,10 @@
 import React from 'react';
-import {range} from 'range';
 import {connect} from 'react-redux';
 import update from 'immutability-helper';
 import {Radio, FormGroup} from 'react-bootstrap';
 import {OptionsToolSelector, OptionsToolView} from './tools/options.js';
 import {MainSelector, MainView} from './tools/main.js';
-import {computeScores, computeWorstCase} from './utils';
+import {computeScores, computeWorstCase, genRandomPermutation} from './utils';
 
 // import {} from './utils';
 
@@ -87,12 +86,18 @@ function taskInitReducer (state) {
   const highlights = new Array(numTransform);
   const affected = new Array(numTransform);
 
+  const {
+    permutation: perm,
+    lockedInputs,
+    lockedOutputs
+  } = genRandomPermutation(bits);
+
   for (let i = 0; i < numTransform; i++) {
     transformations[i] = {
       name: String.fromCharCode(65 + i),
       type: 'permutation',
     };
-    permutation[i] = range(0, bits);
+    permutation[i] = [...perm];
     highlights[i] = new Array(bits).fill(0);
     affected[i] = new Array(bits).fill(0);
   }
@@ -121,6 +126,8 @@ function taskInitReducer (state) {
     affected,
     scores,
     totalScore,
+    lockedInputs,
+    lockedOutputs
   };
 }
 

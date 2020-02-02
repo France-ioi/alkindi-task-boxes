@@ -1,31 +1,41 @@
 import React from 'react';
 import {range} from 'range';
 
-function makePermutationSvgCordinations (bits) {
+function makePermutationSvgCordinations ({bits, lockedInputs, lockedOutputs}) {
   const rect_extra = 20, rect_width = 149;
   const xy_margin = 10;
   const circle_radius = 8;
   const input_spacing = circle_radius * 2 + 11;
   const input_connector_size = circle_radius + 5.5;
+  const lock_width = 20;
 
   // rect
   const rect = {
-    x: 4 + (2 * circle_radius) + input_connector_size,
+    x: 4 + lock_width + (2 * circle_radius) + input_connector_size,
     y: xy_margin,
     width: rect_width,
     height: (2 * rect_extra) + (input_spacing * (bits - 1))
   };
 
+  // svg width, height
+  const total_height = (2 * xy_margin) + rect.height;
+  const total_width = 2 + (2 * lock_width) + (4 * circle_radius) +
+    (2 * input_connector_size) + rect_width;
+
   // circle and rect connectors
   const connectors = [];
   const inputs = [];
   const outputs = [];
+  const inputsLocks = [];
+  const outputsLocks = [];
+
   const input_x1 = rect.x - input_connector_size;
   const input_x2 = rect.x;
   const outrput_x1 = rect.x + rect_width;
   const outrput_x2 = outrput_x1 + input_connector_size;
   const input_cx = input_x1 - circle_radius;
   const output_cx = outrput_x2 + circle_radius;
+  const outputLock_x = total_width - xy_margin + 8;
 
   let connect_y = xy_margin + rect_extra;
 
@@ -45,6 +55,15 @@ function makePermutationSvgCordinations (bits) {
       x2={input_x2}
       y2={connect_y} />);
 
+    if (lockedInputs[i]) {
+      inputsLocks.push(<text
+        key={i}
+        x={xy_margin}
+        y={connect_y + 6}
+        textAnchor="middle">
+        &#xf023;
+      </text >);
+    }
 
     //output
     outputs.push(<circle
@@ -59,6 +78,16 @@ function makePermutationSvgCordinations (bits) {
       y1={connect_y}
       x2={outrput_x2}
       y2={connect_y} />);
+
+    if (lockedOutputs[i]) {
+      outputsLocks.push(<text
+        key={i}
+        x={outputLock_x}
+        y={connect_y + 6}
+        textAnchor="middle">
+        &#xf023;
+      </text >);
+    }
 
     connect_y += input_spacing;
   }
@@ -97,14 +126,12 @@ function makePermutationSvgCordinations (bits) {
     return data;
   }
 
-  // svg width, height
-  const total_height = (2 * xy_margin) + rect.height;
-  const total_width = 2 + (4 * circle_radius) +
-    (2 * input_connector_size) + rect_width;
 
   return {
     rect,
     connectors,
+    inputsLocks,
+    outputsLocks,
     circleInputs: inputs,
     circleOutputs: outputs,
     height: total_height,
@@ -124,12 +151,12 @@ export default class PermutaionTool extends React.PureComponent {
 
   constructor (props) {
     super(props);
-    this.config = makePermutationSvgCordinations(props.bits);
+    this.config = makePermutationSvgCordinations(props);
   }
 
   render () {
     const {rect, connectors, height, width, getPermLines} = this.config;
-    let {circleInputs, circleOutputs} = this.config;
+    let {circleInputs, circleOutputs, inputsLocks, outputsLocks} = this.config;
 
     const {select: {input, output}} = this.state;
     if (input !== -1) {
@@ -147,10 +174,12 @@ export default class PermutaionTool extends React.PureComponent {
       <div className="permutaion_tool">
         <svg ref={this.toolSvg} onMouseDown={this.svgClicked} preserveAspectRatio="xMaxYMax" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
           <rect {...rect} stroke="#000" fill="none" />
+          <g className="lock_perm">{inputsLocks}</g>
           <g className="connects_lines">{connectors}</g>
           <g>{circleInputs}</g>
           <g>{circleOutputs}</g>
           <g className="connects_lines">{perm_lines}</g>
+          <g className="lock_perm">{outputsLocks}</g>
         </svg>
       </div>
     );
@@ -183,7 +212,19 @@ export default class PermutaionTool extends React.PureComponent {
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
     const circle = this.config.getCircle(x, y);
+    const {lockedInputs, lockedOutputs} = this.props;
+
     if (circle) {
+      if (circle[0] === 'input') {
+        if (lockedInputs[circle[1]]) {
+          return;
+        }
+      } else {
+        if (lockedOutputs[circle[1]]) {
+          return;
+        }
+      }
+
       this.setState(function ({select}) {
         select = {...select};
         if (select[circle[0]] === circle[1]) {
