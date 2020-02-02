@@ -2,7 +2,7 @@ import React from 'react';
 import classnames from 'classnames';
 
 
-function makePermutationLines ({config, index, data}) {
+function makePermutationLines ({config, index, data, highlights}) {
   const dataLines = [];
   const {
     rect,
@@ -10,7 +10,9 @@ function makePermutationLines ({config, index, data}) {
     y_pos,
   } = config;
 
-  const [start, end] = x_pos[index];
+  const highlight = highlights[index];
+
+  const [start, end] = x_pos[index+2];
   const x1 = start + 1;
   const x2 = x1 + rect.width - 2;
   const x3 = end;
@@ -19,17 +21,18 @@ function makePermutationLines ({config, index, data}) {
     const y1 = y_pos[i];
     const y2 = y_pos[data[i]];
     const y3 = y2;
+
     dataLines.push(<path
+      className={classnames(highlight[i] && 'highlighted')}
       key={i}
       d={`M ${x1 - 1} ${y1} L ${x1} ${y1}  L ${x2} ${y2} L ${x3} ${y3} `}
     />);
-
   }
 
   return dataLines;
 }
 
-function makeBoxesLines ({config, index, _data}) {
+function makeBoxesLines ({config, index, highlights}) {
   const {
     bits,
     box_extra,
@@ -37,7 +40,8 @@ function makeBoxesLines ({config, index, _data}) {
     y_pos,
   } = config;
 
-  const [start, end] = x_pos[index];
+  const [inputHighlight, outputHighlight] = highlights[index];
+  const [start, end] = x_pos[index+2];
   const input_x1 = start;
   const input_x2 = start + box_extra + 1;
 
@@ -51,6 +55,7 @@ function makeBoxesLines ({config, index, _data}) {
 
     dataLines[i] = <line
       key={i}
+      className={classnames(inputHighlight[i] && 'highlighted')}
       x1={input_x1}
       y1={connect_y}
       x2={input_x2}
@@ -58,6 +63,7 @@ function makeBoxesLines ({config, index, _data}) {
 
     dataLines[i + bits] = <line
       key={i + bits}
+      className={classnames(outputHighlight[i] && 'highlighted')}
       x1={output_x1}
       y1={connect_y}
       x2={output_x2}
@@ -79,7 +85,7 @@ function makeSvg (config, index, type) {
     rect
   } = config;
 
-  const [start] = x_pos[index];
+  const [start] = x_pos[index+2];
 
   rect = {...rect, x: start};
 
@@ -143,7 +149,7 @@ export default class TransformationSvg extends React.PureComponent {
 
   onClicked = () => {
     const {index, onSelectedChanged} = this.props;
-    onSelectedChanged(index - 2);
+    onSelectedChanged(index);
   }
 
   componentDidUpdate () {

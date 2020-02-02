@@ -81,9 +81,9 @@ function taskInitReducer (state) {
 
   const transformations = new Array(numTransform);
   const permutation = new Array(numTransform);
-  const boxes = new Array(numTransform);
   const arrow = -1;
   const selected = 0;
+  const highlights = new Array(numTransform);
 
   for (let i = 0; i < numTransform; i++) {
     transformations[i] = {
@@ -91,15 +91,21 @@ function taskInitReducer (state) {
       type: 'permutation',
     };
     permutation[i] = range(0, bits);
-    boxes[i] = range(0, 8).map(v => [v, 0]);
+    highlights[i] = new Array(bits).fill(0);
   }
 
+  const boxes = new Array(8).fill(0);
+  const inputs = new Array(bits).fill(0);
+
   return {
-    ...state, transformations,
+    ...state,
+    transformations,
     permutation,
+    highlights,
     boxes,
     arrow,
-    selected
+    selected,
+    inputs
   };
 }
 
@@ -109,9 +115,9 @@ function taskRefreshReducer (state) {
 
 function transformTypeChangedReducer (state, {value}) {
   const {selected} = state;
-  return update(state, {
+  return updateHighlights(update(state, {
     transformations: {[selected]: {$merge: {type: value}}}
-  });
+  }));
 }
 
 function transformSelectedChangedReducer (state, {index}) {
@@ -122,8 +128,68 @@ function transformSelectedChangedReducer (state, {index}) {
 
 function transformDataChangedReducer (state, {option_type, data}) {
   const {selected} = state;
+  if (option_type === 'permutation') {
+    state = update(state, {
+      [option_type]: {[selected]: {$set: data}}
+    });
+  } else {
+    state = update(state, {
+      [option_type]: {$set: data}
+    });
+  }
+  return updateHighlights(state);
+}
+
+function inputChangedReducer (state, {position}) {
+  return updateHighlights(update(state, {
+    inputs: {[position]: {$apply: (bit) => bit ^ 1}}
+  }));
+}
+
+function chunkArray (myArray, chunk_size) {
+  var results = [];
+  while (myArray.length) {
+    results.push(myArray.splice(0, chunk_size));
+  }
+  return results;
+}
+
+function updateHighlights (state) {
+  const {transformations, permutation, boxes, inputs} = state;
+  let prevOutput = [...inputs];
+  const highlights = new Array(transformations.length);
+  for (let i = 0; i < transformations.length; i++) {
+    const {type} = transformations[i];
+    if (type === 'permutation') {
+      highlights[i] = [...prevOutput];
+      const perm = permutation[i];
+      const newOutput = [];
+      for (let k = 0; k < perm.length; k++) {
+        newOutput.push(prevOutput[perm[k]]);
+      }
+      prevOutput = newOutput;
+    } else {
+      const newOutput = [];
+      const output = [[...prevOutput], newOutput];
+      const inputChunks = chunkArray(prevOutput, 3);
+      for (let k = 0; k < inputChunks.length; k++) {
+        let value = 0;
+        const chunk = inputChunks[k];
+        for (let p = 0; p < 3; p++) {
+          value |= chunk[p] << p;
+        }
+        const outputValue = boxes[value];
+        for (let p = 0; p < 3; p++) {
+          newOutput.push((outputValue & 1 << p) ? 1 : 0);
+        }
+      }
+      highlights[i] = output;
+      prevOutput = [...newOutput];
+    }
+  }
+
   return update(state, {
-    [option_type]: {[selected]: {$set: data}}
+    highlights: {$set: highlights}
   });
 }
 
@@ -132,6 +198,7 @@ export default {
     transformTypeChanged: 'Transformation.Type.Changed',
     transformSelectedChanged: 'Transformation.Selected.Changed',
     transformDataChanged: 'Transformation.Data.Changed',
+    inputChanged: 'Transformation.Input.Changed',
   },
   actionReducers: {
     appInit: appInitReducer,
@@ -140,6 +207,7 @@ export default {
     transformTypeChanged: transformTypeChangedReducer,
     transformSelectedChanged: transformSelectedChangedReducer,
     transformDataChanged: transformDataChangedReducer,
+    inputChanged: inputChangedReducer,
   },
   views: {
     OptionsTool: connect(OptionsToolSelector)(OptionsToolView),

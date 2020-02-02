@@ -148,19 +148,17 @@ class Box extends React.PureComponent {
 export default class BoxesTool extends React.Component {
   constructor (props) {
     super(props);
-
     this.config = makeBoxSvgs(3);
   }
-
-
 
   render () {
     const {data} = this.props;
     return (
       <div>
+        <h6>{'La configuration ci-dessous sera partagée par toutes les transformations de type boîtes'}</h6>
         {
-          data.map(([input, output], i) =>
-            <Box key={i} input={input} output={output} config={this.config} onUpdate={this.onBoxUpdate} />
+          data.map((output, i) =>
+            <Box key={i} input={i} output={output} config={this.config} onUpdate={this.onBoxUpdate} />
           )
         }
       </div>
@@ -169,7 +167,7 @@ export default class BoxesTool extends React.Component {
 
   onBoxUpdate = ([input, output]) => {
     const {data, onDataChanged} = this.props;
-    const newData = update(data, {$splice: [[input, 1, [input, output]]]});
+    const newData = update(data, {$splice: [[input, 1, output]]});
     onDataChanged(newData);
 
   }

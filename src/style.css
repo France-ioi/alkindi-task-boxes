@@ -19,22 +19,9 @@
   text-align: center;
 }
 
-
 #main_svg_wrapper {
   display: block;
   margin-top: 50px;
-}
-
-#main_svg_wrapper svg {
-  background-color: #fff;
-}
-
-.main svg.arrow_svg {
-  background-color: rgb(240, 253, 216);
-}
-
-.main svg circle {
-  background-color: #d5d5d5;
 }
 
 .main svg circle {
@@ -56,9 +43,17 @@
   stroke-linejoin: round;
 }
 
+.main .paths line.highlighted,
 .main .paths path.highlighted {
   stroke: rgb(0, 0, 0);
   stroke-width: 2;
+}
+
+.main .inputs circle.highlighted,
+.main .outputs circle.highlighted {
+  stroke: rgb(0, 0, 0);
+  stroke-width: 2;
+  fill: #888888;
 }
 
 .main svg rect.main_rect:hover {

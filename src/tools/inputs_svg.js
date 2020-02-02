@@ -34,11 +34,21 @@ function makeSvg (config) {
       y2={connect_y} />);
   }
 
+  const rect = {
+    x: start,
+    y: y_pos[0] - circle_radius,
+    width: line_x1 - start + xy_margin,
+    height: y_pos[bits - 1] - xy_margin,
+    fill: 'transparent',
+    stroke: 'none'
+  };
 
-    return {
-      inputCircles,
-      paths
-    };
+
+  return {
+    rect,
+    inputCircles,
+    paths
+  };
 }
 
 export default class InputsSvg extends React.PureComponent {
@@ -52,13 +62,38 @@ export default class InputsSvg extends React.PureComponent {
   }
 
   render () {
-    const {inputCircles, paths} = this.state.svgData;
+    let {inputCircles, paths, rect} = this.state.svgData;
+    const {inputs} = this.props;
+
+    inputCircles = [...inputCircles];
+    paths = [...paths];
+
+    for (let i = 0; i < inputs.length; i++) {
+      if (inputs[i] === 1) {
+        inputCircles[i] = React.cloneElement(inputCircles[i], {className: 'highlighted'});
+        paths[i] = React.cloneElement(paths[i], {className: 'highlighted'});
+      }
+    }
+
     return (
       <g>
-        <g>{inputCircles}</g>
+        <g className="inputs">{inputCircles}</g>
         <g className="paths">{paths}</g>
+        <rect {...rect} ref={this.toolSvg} onClick={this.svgClicked} />
       </g>
     );
   }
+
+  svgClicked = (event) => {
+    const rect = this.svgRect.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    const pos = this.props.config.getCircle(x, y);
+    this.props.onInputChanged(pos);
+  }
+
+  toolSvg = (element) => {
+    this.svgRect = element;
+  };
 }
 

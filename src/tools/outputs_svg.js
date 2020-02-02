@@ -52,11 +52,23 @@ export default class OutputsSvg extends React.PureComponent {
   }
 
   render () {
-    const {outputCircles, paths} = this.state.svgData;
+    let {outputCircles, paths} = this.state.svgData;
+    const {outputs} = this.props;
+
+    outputCircles = [...outputCircles];
+    paths = [...paths];
+
+    for (let i = 0; i < outputs.length; i++) {
+      if (outputs[i] === 1) {
+        outputCircles[i] = React.cloneElement(outputCircles[i], {className: 'highlighted'});
+        paths[i] = React.cloneElement(paths[i], {className: 'highlighted'});
+      }
+    }
+
     return (
       <g>
         <g className="paths">{paths}</g>
-        <g>{outputCircles}</g>
+        <g className="outputs">{outputCircles}</g>
       </g>
     );
   }

@@ -62,18 +62,10 @@ function makeSvgConfg (bits, numTransforms) {
     });
   }
 
-  // //clicked circle detect
-  // function getCircle (x, y) {
-  //   const sy = xy_margin + rect_extra - circle_radius;
-  //   if (y < sy) {
-  //     return null;
-  //   }
-  //   const pos = parseInt((y - sy) / input_spacing);
-  //   if (x > outrput_x1) {
-  //     return pos;
-  //   }
-  //   return null;
-  // }
+  //clicked circle detect
+  function getCircle (x, y) {
+    return parseInt(y / input_spacing);
+  }
 
 
   return {
@@ -90,6 +82,7 @@ function makeSvgConfg (bits, numTransforms) {
     y_pos,
     height: total_height,
     width: total_width,
+    getCircle
   };
 }
 
@@ -98,18 +91,23 @@ export function MainSelector (state) {
     taskData: {bits},
     transformations,
     permutation,
+    highlights,
     boxes,
+    inputs,
     selected,
-    actions: {transformSelectedChanged}
+    actions: {transformSelectedChanged, inputChanged}
   } = state;
 
   return {
     bits,
     transformations,
     permutation,
+    highlights,
     boxes,
+    inputs,
     selected,
-    transformSelectedChanged
+    transformSelectedChanged,
+    inputChanged
   };
 }
 
@@ -161,7 +159,9 @@ export class MainView extends React.Component {
     const {
       transformations,
       permutation,
+      highlights,
       boxes,
+      inputs,
       selected
     } = this.props;
 
@@ -189,13 +189,14 @@ export class MainView extends React.Component {
           <Titles config={config} transformations={transformations} />
           <svg width={width} height={height}>
             <ArrowSvg config={config} />
-            <InputsSvg config={config} />
+            <InputsSvg config={config} inputs={inputs} onInputChanged={this.onInputChanged} />
             {
               transformationData.map(({type, data}, index) => {
                 const propData = {
                   key: index,
-                  index: index + 2,
+                  index,
                   type,
+                  highlights,
                   selected: selected === index,
                   data: data,
                   config: this.state.config,
@@ -205,7 +206,7 @@ export class MainView extends React.Component {
                 return <TransformationSvg  {...propData} />;
               })
             }
-            <OutputsSvg config={config} />
+            <OutputsSvg config={config} outputs={highlights[highlights.length - 1]} />
           </svg>
         </div>
       </div>
@@ -215,5 +216,10 @@ export class MainView extends React.Component {
   onSelectedChanged = (index) => {
     const {dispatch, transformSelectedChanged} = this.props;
     dispatch({type: transformSelectedChanged, index});
+  }
+
+  onInputChanged = (position) => {
+    const {dispatch, inputChanged} = this.props;
+    dispatch({type: inputChanged, position});
   }
 }

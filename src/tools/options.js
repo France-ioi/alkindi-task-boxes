@@ -12,7 +12,7 @@ export function OptionsToolSelector (state) {
   if (type === 'permutation') {
     data = permutation[selected];
   } else {
-    data = boxes[selected];
+    data = boxes;
   }
 
   return {
