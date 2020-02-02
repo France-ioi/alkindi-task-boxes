@@ -66,22 +66,22 @@ function computeImpact (transformations, permutations, boxes, inputs, selectedIn
   };
 }
 
-function genRandomInput (nbInputs) {
+function genRandomInput (rng, nbInputs) {
   var inputs = [];
-  const rng0 = seedrandom(seed);
   for (var iInput = 0; iInput < nbInputs; iInput++) {
-    inputs[iInput] = Math.floor(rng0() * 2);
+    inputs[iInput] = Math.floor(rng() * 2);
   }
   return inputs;
 }
 
-function computeWorstCase (transformations, permutations, boxes, selectedInput) {
+export function computeWorstCase (transformations, permutations, boxes, selectedInput) {
   var nbAttempts = 200;
   var worstInputs = [];
   var nbInputs = permutations[0].length;
   var minImpact = {nbDiff: 1000};
+  const rng0 = seedrandom(seed);
   for (var iAttempt = 0; iAttempt < nbAttempts; iAttempt++) {
-    var inputs = genRandomInput(nbInputs);
+    var inputs = genRandomInput(rng0, nbInputs);
     var impact = computeImpact(transformations, permutations, boxes, inputs, selectedInput);
     //console.log("diff : " + impact.nbDiff + " for " + impact.impactedOutputs);
     if (impact.nbDiff < minImpact.nbDiff) {

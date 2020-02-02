@@ -3,13 +3,16 @@ import ArrowSvg from './arrow_svg';
 import InputsSvg from './inputs_svg';
 import OutputsSvg from './outputs_svg';
 import TransformationSvg from './transformation_svg';
+import ScoresView from './scores_view';
+import Titles from './titles_view';
+import ModeSwitchView from './mode_switch_view';
 
 function makeSvgConfg (bits, numTransforms) {
-  const rect_extra = 15, rect_width = 50;
-  const xy_margin = 4;
+  const rect_extra = 20, rect_width = 50;
+  const xy_margin = 10;
   const box_extra = 4;
-  const circle_radius = 7;
-  const input_spacing = circle_radius * 2 + 10;
+  const circle_radius = 8;
+  const input_spacing = circle_radius * 2 + 11;
   const space_transform = 14;
   const width_input = 35;
   const width_arrow = 30;
@@ -41,7 +44,6 @@ function makeSvgConfg (bits, numTransforms) {
   const total_height = (2 * xy_margin) + rect.height;
   const total_width = (2 * xy_margin) + x + width_input - space_transform + width_score;
 
-
   let connect_y = xy_margin + rect_extra;
 
   const y_pos = [];
@@ -67,7 +69,6 @@ function makeSvgConfg (bits, numTransforms) {
   function getCircle (x, y) {
     return parseInt(y / input_spacing);
   }
-
 
   return {
     rect,
@@ -102,8 +103,14 @@ export function MainSelector (state) {
     affected,
     outputs,
     outputAffected,
+    inputMode,
     selected,
-    actions: {transformSelectedChanged, transformInputChanged, transformArrowSelected}
+    actions: {
+      transformSelectedChanged,
+      transformInputChanged,
+      transformArrowSelected,
+      transformInputModeChanged
+    }
   } = state;
 
   return {
@@ -120,65 +127,14 @@ export function MainSelector (state) {
     outputs,
     outputAffected,
     selected,
+    inputMode,
+    transformInputModeChanged,
     transformSelectedChanged,
     transformInputChanged,
     transformArrowSelected,
   };
 }
 
-class ScoresView extends React.PureComponent {
-  render () {
-    const {scores, config} = this.props;
-    const {y_pos, xy_margin, width} = config;
-    const text = [];
-    for (let i = 0; i < scores.length; i++) {
-      text.push(<text
-        key={i}
-        x={width - xy_margin - 10}
-        y={y_pos[i] + 6}
-        fontSize="15px"
-        textAnchor="middle">
-        {scores[i]}
-      </text >);
-    }
-
-    return (
-      <g>
-        {text}
-      </g>
-    );
-  }
-}
-
-class Titles extends React.PureComponent {
-  render () {
-    const {config, transformations} = this.props;
-    const letters = [];
-    const {x_pos, rect: {width}} = config;
-
-    for (let i = 0; i < transformations.length; i++) {
-      letters.push(<h4
-        key={i}
-        style={{width, left: `${x_pos[i + 2][0]}px`, position: 'absolute'}}
-      >
-        {transformations[i].name}
-      </h4>);
-    }
-    const styles = {
-      width,
-      position: 'absolute',
-      transform: 'translate(2px,-5px) rotate(-45deg)'
-    };
-
-    return (
-      <div className="titles">
-        <h4 style={{...styles, left: `${x_pos[1][0]}px`}}>Entrees</h4>
-        {letters}
-        <h4 style={{...styles, left: `${x_pos[x_pos.length - 1][0]}px`}}>Sorties</h4>
-      </div>
-    );
-  }
-}
 
 export class MainView extends React.Component {
 
@@ -201,6 +157,7 @@ export class MainView extends React.Component {
       highlights,
       affected,
       outputAffected,
+      inputMode,
       boxes,
       arrow,
       inputs,
@@ -256,11 +213,17 @@ export class MainView extends React.Component {
             <ScoresView config={config} scores={scores} />
           </svg>
           <div className="total_score">
-            <h5>{`Score total : ${totalScore}`}</h5>
+            <h5>{`Total : ${totalScore}`}</h5>
           </div>
         </div>
+        <ModeSwitchView mode={inputMode} onModeChanged={this.onModeChanged} />
       </div>
     );
+  }
+
+  onModeChanged = (mode) => {
+    const {dispatch, transformInputModeChanged} = this.props;
+    dispatch({type: transformInputModeChanged, mode});
   }
 
   onArrowSelected = (index) => {

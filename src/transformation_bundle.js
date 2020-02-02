@@ -5,7 +5,7 @@ import update from 'immutability-helper';
 import {Radio, FormGroup} from 'react-bootstrap';
 import {OptionsToolSelector, OptionsToolView} from './tools/options.js';
 import {MainSelector, MainView} from './tools/main.js';
-import {computeScores} from './utils';
+import {computeScores, computeWorstCase} from './utils';
 
 // import {} from './utils';
 
@@ -102,8 +102,9 @@ function taskInitReducer (state) {
   const outputs = new Array(bits).fill(0);
   const outputAffected = new Array(bits).fill(0);
 
-  const scores = new Array(bits).fill(0);
+  const scores = new Array(bits).fill(1);
   const totalScore = 0;
+  const inputMode = 'manual';
 
   return {
     ...state,
@@ -114,6 +115,7 @@ function taskInitReducer (state) {
     arrow,
     selected,
     inputs,
+    inputMode,
     outputs,
     outputAffected,
     affected,
@@ -154,6 +156,11 @@ function transformDataChangedReducer (state, {option_type, data}) {
 }
 
 function transformInputChangedReducer (state, {position}) {
+  const {inputMode} = state;
+  if (inputMode === 'auto') {
+    return state;
+  }
+
   return updateScores(updateHighlights(update(state, {
     inputs: {[position]: {$apply: (bit) => bit ^ 1}},
     arrow: {$apply: (value) => value === position ? -1 : value}
@@ -161,10 +168,29 @@ function transformInputChangedReducer (state, {position}) {
 }
 
 function transformArrowSelectedReducer (state, {index}) {
-  return updateScores(updateHighlights(update(state, {
+  state = update(state, {
     arrow: {$apply: (value) => value === index ? -1 : index}
+  });
+  const {transformations, permutation, boxes, arrow, inputMode} = state;
+  if (inputMode === 'auto' && arrow !== -1) {
+    const {inputs} = computeWorstCase(transformations, permutation, boxes, arrow);
+    state = {...state, inputs};
+  }
+  return updateScores(updateHighlights(state));
+}
+
+function transformInputModeChangedReducer (state, {mode}) {
+  const {transformations, permutation, boxes, arrow} = state;
+  let inputs = null;
+  if (mode === 'auto' && arrow !== -1) {
+    inputs = computeWorstCase(transformations, permutation, boxes, arrow).inputs;
+  }
+  return updateScores(updateHighlights(update(state, {
+    inputMode: {$set: mode},
+    inputs: {$apply: (oldInput) => inputs || oldInput}
   })));
 }
+
 
 function chunkArray (myArray, chunk_size) {
   var results = [];
@@ -267,6 +293,7 @@ export default {
     transformDataChanged: 'Transformation.Data.Changed',
     transformInputChanged: 'Transformation.Input.Changed',
     transformArrowSelected: 'Transformation.Arrow.Selected.Changed',
+    transformInputModeChanged: 'Transformation.Input.Mode.Changed',
   },
   actionReducers: {
     appInit: appInitReducer,
@@ -277,6 +304,7 @@ export default {
     transformDataChanged: transformDataChangedReducer,
     transformInputChanged: transformInputChangedReducer,
     transformArrowSelected: transformArrowSelectedReducer,
+    transformInputModeChanged: transformInputModeChangedReducer,
   },
   views: {
     OptionsTool: connect(OptionsToolSelector)(OptionsToolView),
