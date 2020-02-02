@@ -95,6 +95,7 @@ export function MainSelector (state) {
     boxes,
     arrow,
     inputs,
+    outputs,
     selected,
     actions: {transformSelectedChanged, transformInputChanged, transformArrowSelected}
   } = state;
@@ -107,6 +108,7 @@ export function MainSelector (state) {
     boxes,
     arrow,
     inputs,
+    outputs,
     selected,
     transformSelectedChanged,
     transformInputChanged,
@@ -166,6 +168,7 @@ export class MainView extends React.Component {
       boxes,
       arrow,
       inputs,
+      outputs,
       selected
     } = this.props;
 
@@ -193,7 +196,7 @@ export class MainView extends React.Component {
           <Titles config={config} transformations={transformations} />
           <svg width={width} height={height}>
             <ArrowSvg config={config} selectedIndex={arrow} onArrowSelected={this.onArrowSelected} />
-            <InputsSvg config={config} inputs={inputs} onInputChanged={this.onInputChanged} />
+            <InputsSvg config={config} arrow={arrow} inputs={inputs} onInputChanged={this.onInputChanged} />
             {
               transformationData.map(({type, data}, index) => {
                 const propData = {
@@ -210,7 +213,7 @@ export class MainView extends React.Component {
                 return <TransformationSvg  {...propData} />;
               })
             }
-            <OutputsSvg config={config} outputs={highlights[highlights.length - 1]} />
+            <OutputsSvg config={config} outputs={outputs} />
           </svg>
         </div>
       </div>

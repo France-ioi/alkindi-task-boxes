@@ -63,16 +63,21 @@ export default class InputsSvg extends React.PureComponent {
 
   render () {
     let {inputCircles, paths, rect} = this.state.svgData;
-    const {inputs} = this.props;
+    const {inputs, arrow} = this.props;
 
     inputCircles = [...inputCircles];
     paths = [...paths];
 
     for (let i = 0; i < inputs.length; i++) {
-      if (inputs[i] === 1) {
+      if (inputs[i] === 1 && arrow !== i) {
         inputCircles[i] = React.cloneElement(inputCircles[i], {className: 'highlighted'});
         paths[i] = React.cloneElement(paths[i], {className: 'highlighted'});
       }
+    }
+
+    if (arrow !== -1) {
+      inputCircles[arrow] = React.cloneElement(inputCircles[arrow], {className: 'affected'});
+      paths[arrow] = React.cloneElement(paths[arrow], {className: 'affected'});
     }
 
     return (

@@ -58,14 +58,27 @@
 .main .paths line.highlighted,
 .main .paths path.highlighted {
   stroke: rgb(0, 0, 0);
-  stroke-width: 2;
+  stroke-width: 3;
 }
 
 .main .inputs circle.highlighted,
 .main .outputs circle.highlighted {
   stroke: rgb(0, 0, 0);
-  stroke-width: 2;
+  stroke-width: 3;
   fill: #888888;
+}
+
+.main .paths line.affected,
+.main .paths path.affected {
+  stroke: #b8572d;
+  stroke-width: 3;
+}
+
+.main .inputs circle.affected,
+.main .outputs circle.affected {
+  stroke: #b8572d;
+  stroke-width: 2;
+  fill: #ef7c12;
 }
 
 .main svg rect.main_rect:hover {

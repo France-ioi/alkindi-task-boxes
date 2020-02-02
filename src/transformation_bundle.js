@@ -96,6 +96,7 @@ function taskInitReducer (state) {
 
   const boxes = new Array(8).fill(0);
   const inputs = new Array(bits).fill(0);
+  const outputs = new Array(bits).fill(0);
 
   return {
     ...state,
@@ -105,7 +106,8 @@ function taskInitReducer (state) {
     boxes,
     arrow,
     selected,
-    inputs
+    inputs,
+    outputs
   };
 }
 
@@ -162,7 +164,7 @@ function chunkArray (myArray, chunk_size) {
 }
 
 function updateHighlights (state) {
-  const {transformations, permutation, boxes, inputs} = state;
+  const {taskData:{bits}, transformations, permutation, boxes, inputs} = state;
   let prevOutput = [...inputs];
   const highlights = new Array(transformations.length);
   for (let i = 0; i < transformations.length; i++) {
@@ -170,9 +172,9 @@ function updateHighlights (state) {
     if (type === 'permutation') {
       highlights[i] = [...prevOutput];
       const perm = permutation[i];
-      const newOutput = [];
-      for (let k = 0; k < perm.length; k++) {
-        newOutput.push(prevOutput[perm[k]]);
+      const newOutput = new Array(bits);
+      for (let k = 0; k < bits; k++) {
+        newOutput[perm[k]] = prevOutput[k];
       }
       prevOutput = newOutput;
     } else {
@@ -194,9 +196,11 @@ function updateHighlights (state) {
       prevOutput = [...newOutput];
     }
   }
+  const outputs = prevOutput;
 
   return update(state, {
-    highlights: {$set: highlights}
+    highlights: {$set: highlights},
+    outputs: {$set: outputs}
   });
 }
 
