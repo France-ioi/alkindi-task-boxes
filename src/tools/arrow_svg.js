@@ -21,7 +21,7 @@ function makeSvg (config) {
       x1={xy_margin}
       y1={y}
       x2={end - 20}
-      y2={y} stroke="orange"
+      y2={y} stroke="#fa620a"
       strokeWidth="3"
       markerEnd="url(#arrow)" />);
   }
@@ -82,7 +82,7 @@ export default class ArrowSvg extends React.PureComponent {
             refY="1.5"
             orient="auto"
             markerUnits="strokeWidth">
-            <path d="M0,0 L0,3 L4.5,1.5 z" fill="orange" />
+            <path d="M0,0 L0,3 L4.5,1.5 z" fill="#fa620a" />
           </marker>
         </defs>
         {lines}

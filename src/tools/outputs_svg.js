@@ -1,4 +1,5 @@
 import React from 'react';
+import classnames from 'classnames';
 
 function makeSvg (config) {
 
@@ -53,15 +54,20 @@ export default class OutputsSvg extends React.PureComponent {
 
   render () {
     let {outputCircles, paths} = this.state.svgData;
-    const {outputs} = this.props;
+    const {outputs, affected} = this.props;
+
 
     outputCircles = [...outputCircles];
     paths = [...paths];
 
     for (let i = 0; i < outputs.length; i++) {
-      if (outputs[i] === 1) {
-        outputCircles[i] = React.cloneElement(outputCircles[i], {className: 'highlighted'});
-        paths[i] = React.cloneElement(paths[i], {className: 'highlighted'});
+      const classes = classnames({
+        highlighted: outputs[i] === 1,
+        affected: affected[i] === 1
+      });
+      if (classes) {
+        outputCircles[i] = React.cloneElement(outputCircles[i], {className: classes});
+        paths[i] = React.cloneElement(paths[i], {className: classes});
       }
     }
 

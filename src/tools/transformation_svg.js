@@ -2,7 +2,7 @@ import React from 'react';
 import classnames from 'classnames';
 
 
-function makePermutationLines ({config, index, data, highlights}) {
+function makePermutationLines ({config, index, data, highlights, affected}) {
   const dataLines = [];
   const {
     rect,
@@ -11,8 +11,9 @@ function makePermutationLines ({config, index, data, highlights}) {
   } = config;
 
   const highlight = highlights[index];
+  const affect = affected[index];
 
-  const [start, end] = x_pos[index+2];
+  const [start, end] = x_pos[index + 2];
   const x1 = start + 1;
   const x2 = x1 + rect.width - 2;
   const x3 = end;
@@ -22,8 +23,13 @@ function makePermutationLines ({config, index, data, highlights}) {
     const y2 = y_pos[data[i]];
     const y3 = y2;
 
+    const classes = classnames({
+      highlighted: highlight[i] === 1,
+      affected: affect[i] === 1
+    });
+
     dataLines.push(<path
-      className={classnames(highlight[i] && 'highlighted')}
+      className={classes}
       key={i}
       d={`M ${x1 - 1} ${y1} L ${x1} ${y1}  L ${x2} ${y2} L ${x3} ${y3} `}
     />);
@@ -32,7 +38,7 @@ function makePermutationLines ({config, index, data, highlights}) {
   return dataLines;
 }
 
-function makeBoxesLines ({config, index, highlights}) {
+function makeBoxesLines ({config, index, highlights, affected}) {
   const {
     bits,
     box_extra,
@@ -41,7 +47,8 @@ function makeBoxesLines ({config, index, highlights}) {
   } = config;
 
   const [inputHighlight, outputHighlight] = highlights[index];
-  const [start, end] = x_pos[index+2];
+  const [inputAffected, outputAffected] = affected[index];
+  const [start, end] = x_pos[index + 2];
   const input_x1 = start;
   const input_x2 = start + box_extra + 1;
 
@@ -55,7 +62,10 @@ function makeBoxesLines ({config, index, highlights}) {
 
     dataLines[i] = <line
       key={i}
-      className={classnames(inputHighlight[i] && 'highlighted')}
+      className={classnames({
+        highlighted: inputHighlight[i] === 1,
+        affected: inputAffected[i] === 1
+      })}
       x1={input_x1}
       y1={connect_y}
       x2={input_x2}
@@ -63,7 +73,10 @@ function makeBoxesLines ({config, index, highlights}) {
 
     dataLines[i + bits] = <line
       key={i + bits}
-      className={classnames(outputHighlight[i] && 'highlighted')}
+      className={classnames({
+        highlighted: outputHighlight[i] === 1,
+        affected: outputAffected[i] === 1
+      })}
       x1={output_x1}
       y1={connect_y}
       x2={output_x2}
@@ -85,7 +98,7 @@ function makeSvg (config, index, type) {
     rect
   } = config;
 
-  const [start] = x_pos[index+2];
+  const [start] = x_pos[index + 2];
 
   rect = {...rect, x: start};
 

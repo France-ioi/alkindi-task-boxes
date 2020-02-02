@@ -99,7 +99,9 @@ export function MainSelector (state) {
     boxes,
     arrow,
     inputs,
+    affected,
     outputs,
+    outputAffected,
     selected,
     actions: {transformSelectedChanged, transformInputChanged, transformArrowSelected}
   } = state;
@@ -114,7 +116,9 @@ export function MainSelector (state) {
     boxes,
     arrow,
     inputs,
+    affected,
     outputs,
+    outputAffected,
     selected,
     transformSelectedChanged,
     transformInputChanged,
@@ -129,6 +133,7 @@ class ScoresView extends React.PureComponent {
     const text = [];
     for (let i = 0; i < scores.length; i++) {
       text.push(<text
+        key={i}
         x={width - xy_margin}
         y={y_pos[i] + 6}
         fontSize="15px"
@@ -195,6 +200,7 @@ export class MainView extends React.Component {
       permutation,
       highlights,
       affected,
+      outputAffected,
       boxes,
       arrow,
       inputs,
@@ -246,7 +252,7 @@ export class MainView extends React.Component {
                 return <TransformationSvg  {...propData} />;
               })
             }
-            <OutputsSvg config={config} outputs={outputs} />
+            <OutputsSvg config={config} affected={outputAffected} outputs={outputs} />
             <ScoresView config={config} scores={scores} />
           </svg>
           <div className="total_score">

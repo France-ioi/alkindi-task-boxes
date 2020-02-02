@@ -85,6 +85,7 @@ function taskInitReducer (state) {
   const arrow = -1;
   const selected = 0;
   const highlights = new Array(numTransform);
+  const affected = new Array(numTransform);
 
   for (let i = 0; i < numTransform; i++) {
     transformations[i] = {
@@ -93,12 +94,13 @@ function taskInitReducer (state) {
     };
     permutation[i] = range(0, bits);
     highlights[i] = new Array(bits).fill(0);
+    affected[i] = new Array(bits).fill(0);
   }
 
   const boxes = new Array(8).fill(0);
   const inputs = new Array(bits).fill(0);
   const outputs = new Array(bits).fill(0);
-  const affected = new Array(numTransform).fill([]);
+  const outputAffected = new Array(bits).fill(0);
 
   const scores = new Array(bits).fill(0);
   const totalScore = 0;
@@ -113,6 +115,7 @@ function taskInitReducer (state) {
     selected,
     inputs,
     outputs,
+    outputAffected,
     affected,
     scores,
     totalScore,
@@ -184,44 +187,76 @@ function updateScores (state) {
   });
 }
 
-function updateHighlights (state) {
-  const {taskData: {bits}, transformations, permutation, boxes, inputs} = state;
-  let prevOutput = [...inputs];
-  const highlights = new Array(transformations.length);
-  for (let i = 0; i < transformations.length; i++) {
-    const {type} = transformations[i];
-    if (type === 'permutation') {
-      highlights[i] = [...prevOutput];
-      const perm = permutation[i];
-      const newOutput = new Array(bits);
-      for (let k = 0; k < bits; k++) {
-        newOutput[perm[k]] = prevOutput[k];
-      }
-      prevOutput = newOutput;
-    } else {
-      const newOutput = [];
-      const output = [[...prevOutput], newOutput];
-      const inputChunks = chunkArray(prevOutput, 3);
-      for (let k = 0; k < inputChunks.length; k++) {
-        let value = 0;
-        const chunk = inputChunks[k];
-        for (let p = 0; p < 3; p++) {
-          value |= chunk[p] << p;
-        }
-        const outputValue = boxes[value];
-        for (let p = 0; p < 3; p++) {
-          newOutput.push((outputValue & 1 << p) ? 1 : 0);
-        }
-      }
-      highlights[i] = output;
-      prevOutput = [...newOutput];
+function applyPermutation (bits, prevOutput, perm) {
+  const newOutput = new Array(bits);
+  for (let k = 0; k < bits; k++) {
+    newOutput[perm[k]] = prevOutput[k];
+  }
+  return newOutput;
+}
+
+function applyBoxes (prevOutput, boxes) {
+  const newOutput = [];
+  const inputChunks = chunkArray(prevOutput, 3);
+  for (let k = 0; k < inputChunks.length; k++) {
+    let value = 0;
+    const chunk = inputChunks[k];
+    for (let p = 0; p < 3; p++) {
+      value |= chunk[p] << p;
+    }
+    const outputValue = boxes[value];
+    for (let p = 0; p < 3; p++) {
+      newOutput.push((outputValue & 1 << p) ? 1 : 0);
     }
   }
+  return newOutput;
+}
+
+function updateHighlights (state) {
+  const {taskData: {bits}, transformations, permutation, boxes, inputs, arrow} = state;
+  let prevOutput = [...inputs];
+  let prevOutputFlipped = [...inputs];
+  prevOutputFlipped[arrow] = 1 - prevOutputFlipped[arrow];
+  const highlights = new Array(transformations.length);
+  const orangeHighlights = new Array(transformations.length);
+  for (let i = 0; i < transformations.length; i++) {
+    const {type} = transformations[i];
+    let prevDifferences = [];
+    for (let iBit = 0; iBit < bits; iBit++) {
+      prevDifferences[iBit] = (prevOutput[iBit] != prevOutputFlipped[iBit]) ? 1 : 0;
+    }
+    let newOutput = [];
+    let newOutputFlipped = [];
+    if (type === 'permutation') {
+      highlights[i] = [...prevOutput];
+      orangeHighlights[i] = prevDifferences;
+      const perm = permutation[i];
+      newOutput = applyPermutation(bits, prevOutput, perm);
+      newOutputFlipped = applyPermutation(bits, prevOutputFlipped, perm);
+    } else {
+      newOutput = applyBoxes(prevOutput, boxes);
+      newOutputFlipped = applyBoxes(prevOutputFlipped, boxes);
+      highlights[i] = [[...prevOutput], newOutput];
+      let newDifferences = [];
+      for (let iBit = 0; iBit < bits; iBit++) {
+        newDifferences[iBit] = (newOutput[iBit] != newOutputFlipped[iBit]) ? 1 : 0;
+      }
+      orangeHighlights[i] = [prevDifferences, newDifferences];
+    }
+    prevOutput = newOutput;
+    prevOutputFlipped = newOutputFlipped;
+  }
   const outputs = prevOutput;
+  const outputAffected = [];
+  for (let iBit = 0; iBit < bits; iBit++) {
+    outputAffected[iBit] = (prevOutput[iBit] != prevOutputFlipped[iBit]) ? 1 : 0;
+  }
 
   return update(state, {
     highlights: {$set: highlights},
-    outputs: {$set: outputs}
+    affected: {$set: orangeHighlights},
+    outputs: {$set: outputs},
+    outputAffected: {$set: outputAffected}
   });
 }
 
