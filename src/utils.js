@@ -1,5 +1,7 @@
 import seedrandom from "seedrandom";
 
+const seed = 10;
+
 function applyPermutation (inputs, permutation) {
   var result = [];
   for (var iInput = 0; iInput < inputs.length; iInput++) {
@@ -66,7 +68,7 @@ function computeImpact (transformations, permutations, boxes, inputs, selectedIn
 
 function genRandomInput (nbInputs) {
   var inputs = [];
-  const rng0 = seedrandom(11);
+  const rng0 = seedrandom(seed);
   for (var iInput = 0; iInput < nbInputs; iInput++) {
     inputs[iInput] = Math.floor(rng0() * 2);
   }
