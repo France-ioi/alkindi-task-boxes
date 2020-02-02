@@ -43,6 +43,18 @@
   stroke-linejoin: round;
 }
 
+.main .arrow_svg line {
+  opacity: 0;
+}
+
+.main .arrow_svg line.hover {
+  opacity: 0.5;
+}
+
+.main .arrow_svg line.selected {
+  opacity: 1;
+}
+
 .main .paths line.highlighted,
 .main .paths path.highlighted {
   stroke: rgb(0, 0, 0);

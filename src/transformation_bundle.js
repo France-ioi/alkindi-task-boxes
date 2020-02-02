@@ -140,9 +140,16 @@ function transformDataChangedReducer (state, {option_type, data}) {
   return updateHighlights(state);
 }
 
-function inputChangedReducer (state, {position}) {
+function transformInputChangedReducer (state, {position}) {
   return updateHighlights(update(state, {
-    inputs: {[position]: {$apply: (bit) => bit ^ 1}}
+    inputs: {[position]: {$apply: (bit) => bit ^ 1}},
+    arrow: {$apply: (value) => value === position ? -1 : value}
+  }));
+}
+
+function transformArrowSelectedReducer (state, {index}) {
+  return updateHighlights(update(state, {
+    arrow: {$apply: (value) => value === index ? -1 : index}
   }));
 }
 
@@ -198,7 +205,8 @@ export default {
     transformTypeChanged: 'Transformation.Type.Changed',
     transformSelectedChanged: 'Transformation.Selected.Changed',
     transformDataChanged: 'Transformation.Data.Changed',
-    inputChanged: 'Transformation.Input.Changed',
+    transformInputChanged: 'Transformation.Input.Changed',
+    transformArrowSelected: 'Transformation.Arrow.Selected.Changed',
   },
   actionReducers: {
     appInit: appInitReducer,
@@ -207,7 +215,8 @@ export default {
     transformTypeChanged: transformTypeChangedReducer,
     transformSelectedChanged: transformSelectedChangedReducer,
     transformDataChanged: transformDataChangedReducer,
-    inputChanged: inputChangedReducer,
+    transformInputChanged: transformInputChangedReducer,
+    transformArrowSelected: transformArrowSelectedReducer,
   },
   views: {
     OptionsTool: connect(OptionsToolSelector)(OptionsToolView),

@@ -93,9 +93,10 @@ export function MainSelector (state) {
     permutation,
     highlights,
     boxes,
+    arrow,
     inputs,
     selected,
-    actions: {transformSelectedChanged, inputChanged}
+    actions: {transformSelectedChanged, transformInputChanged, transformArrowSelected}
   } = state;
 
   return {
@@ -104,10 +105,12 @@ export function MainSelector (state) {
     permutation,
     highlights,
     boxes,
+    arrow,
     inputs,
     selected,
     transformSelectedChanged,
-    inputChanged
+    transformInputChanged,
+    transformArrowSelected,
   };
 }
 
@@ -161,6 +164,7 @@ export class MainView extends React.Component {
       permutation,
       highlights,
       boxes,
+      arrow,
       inputs,
       selected
     } = this.props;
@@ -188,7 +192,7 @@ export class MainView extends React.Component {
         <div id="main_svg_wrapper" style={{width}}>
           <Titles config={config} transformations={transformations} />
           <svg width={width} height={height}>
-            <ArrowSvg config={config} />
+            <ArrowSvg config={config} selectedIndex={arrow} onArrowSelected={this.onArrowSelected} />
             <InputsSvg config={config} inputs={inputs} onInputChanged={this.onInputChanged} />
             {
               transformationData.map(({type, data}, index) => {
@@ -213,13 +217,18 @@ export class MainView extends React.Component {
     );
   }
 
+  onArrowSelected = (index) => {
+    const {dispatch, transformArrowSelected} = this.props;
+    dispatch({type: transformArrowSelected, index});
+  }
+
   onSelectedChanged = (index) => {
     const {dispatch, transformSelectedChanged} = this.props;
     dispatch({type: transformSelectedChanged, index});
   }
 
   onInputChanged = (position) => {
-    const {dispatch, inputChanged} = this.props;
-    dispatch({type: inputChanged, position});
+    const {dispatch, transformInputChanged} = this.props;
+    dispatch({type: transformInputChanged, position});
   }
 }
