@@ -21,14 +21,13 @@
 
 .mode_radio {
   width: 201px;
-  margin: 40px auto 0px;
+  margin: 45px auto 0px;
 }
 
 .total_score {
   position: relative;
   float: right;
-  right: 12px;
-  font-size: 18px;
+  right: -9px;
 }
 
 .total_score > h5 {

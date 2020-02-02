@@ -91,7 +91,7 @@ function makeSvgConfg (bits, numTransforms) {
 
 export function MainSelector (state) {
   const {
-    taskData: {bits},
+    taskData: {bits, minScore},
     scores,
     totalScore,
     transformations,
@@ -117,6 +117,7 @@ export function MainSelector (state) {
     bits,
     scores,
     totalScore,
+    minScore,
     transformations,
     permutation,
     highlights,
@@ -165,6 +166,7 @@ export class MainView extends React.Component {
       selected,
       scores,
       totalScore,
+      minScore
     } = this.props;
 
     const transformationData = [];
@@ -214,6 +216,7 @@ export class MainView extends React.Component {
           </svg>
           <div className="total_score">
             <h5>{`Total : ${totalScore}`}</h5>
+            <h5>{`Score : ${Math.min(100, Math.max(0, totalScore - minScore))}%`}</h5>
           </div>
         </div>
         <ModeSwitchView mode={inputMode} onModeChanged={this.onModeChanged} />
