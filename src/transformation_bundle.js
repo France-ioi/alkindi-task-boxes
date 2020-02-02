@@ -171,23 +171,12 @@ function transformArrowSelectedReducer (state, {index}) {
   state = update(state, {
     arrow: {$apply: (value) => value === index ? -1 : index}
   });
-  const {transformations, permutation, boxes, arrow, inputMode} = state;
-  if (inputMode === 'auto' && arrow !== -1) {
-    const {inputs} = computeWorstCase(transformations, permutation, boxes, arrow);
-    state = {...state, inputs};
-  }
   return updateScores(updateHighlights(state));
 }
 
 function transformInputModeChangedReducer (state, {mode}) {
-  const {transformations, permutation, boxes, arrow} = state;
-  let inputs = null;
-  if (mode === 'auto' && arrow !== -1) {
-    inputs = computeWorstCase(transformations, permutation, boxes, arrow).inputs;
-  }
   return updateScores(updateHighlights(update(state, {
     inputMode: {$set: mode},
-    inputs: {$apply: (oldInput) => inputs || oldInput}
   })));
 }
 
@@ -238,7 +227,17 @@ function applyBoxes (prevOutput, boxes) {
   return newOutput;
 }
 
+function updateInputs (state) {
+  const {transformations, permutation, boxes, arrow, inputMode} = state;
+  if (inputMode === 'auto' && arrow !== -1) {
+    const {inputs} = computeWorstCase(transformations, permutation, boxes, arrow);
+    state = {...state, inputs};
+  }
+  return state;
+}
+
 function updateHighlights (state) {
+  state = updateInputs(state);
   const {taskData: {bits}, transformations, permutation, boxes, inputs, arrow} = state;
   let prevOutput = [...inputs];
   let prevOutputFlipped = [...inputs];
