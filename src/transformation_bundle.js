@@ -5,6 +5,7 @@ import update from 'immutability-helper';
 import {Radio, FormGroup} from 'react-bootstrap';
 import {OptionsToolSelector, OptionsToolView} from './tools/options.js';
 import {MainSelector, MainView} from './tools/main.js';
+import {computeScores} from './utils';
 
 // import {} from './utils';
 
@@ -97,6 +98,10 @@ function taskInitReducer (state) {
   const boxes = new Array(8).fill(0);
   const inputs = new Array(bits).fill(0);
   const outputs = new Array(bits).fill(0);
+  const affected = new Array(numTransform).fill([]);
+
+  const scores = new Array(bits).fill(0);
+  const totalScore = 0;
 
   return {
     ...state,
@@ -107,7 +112,10 @@ function taskInitReducer (state) {
     arrow,
     selected,
     inputs,
-    outputs
+    outputs,
+    affected,
+    scores,
+    totalScore,
   };
 }
 
@@ -117,9 +125,9 @@ function taskRefreshReducer (state) {
 
 function transformTypeChangedReducer (state, {value}) {
   const {selected} = state;
-  return updateHighlights(update(state, {
+  return updateScores(updateHighlights(update(state, {
     transformations: {[selected]: {$merge: {type: value}}}
-  }));
+  })));
 }
 
 function transformSelectedChangedReducer (state, {index}) {
@@ -139,20 +147,20 @@ function transformDataChangedReducer (state, {option_type, data}) {
       [option_type]: {$set: data}
     });
   }
-  return updateHighlights(state);
+  return updateScores(updateHighlights(state));
 }
 
 function transformInputChangedReducer (state, {position}) {
-  return updateHighlights(update(state, {
+  return updateScores(updateHighlights(update(state, {
     inputs: {[position]: {$apply: (bit) => bit ^ 1}},
     arrow: {$apply: (value) => value === position ? -1 : value}
-  }));
+  })));
 }
 
 function transformArrowSelectedReducer (state, {index}) {
-  return updateHighlights(update(state, {
+  return updateScores(updateHighlights(update(state, {
     arrow: {$apply: (value) => value === index ? -1 : index}
-  }));
+  })));
 }
 
 function chunkArray (myArray, chunk_size) {
@@ -163,8 +171,21 @@ function chunkArray (myArray, chunk_size) {
   return results;
 }
 
+function updateScores (state) {
+  const {taskData: {bits}, transformations, permutation, boxes} = state;
+  let scores = computeScores(transformations, permutation, boxes);
+  let totalScore = 0;
+  for (let iOutput = 0; iOutput < bits; iOutput++) {
+    totalScore += scores[iOutput];
+  }
+  return update(state, {
+    scores: {$set: scores},
+    totalScore: {$set: totalScore}
+  });
+}
+
 function updateHighlights (state) {
-  const {taskData:{bits}, transformations, permutation, boxes, inputs} = state;
+  const {taskData: {bits}, transformations, permutation, boxes, inputs} = state;
   let prevOutput = [...inputs];
   const highlights = new Array(transformations.length);
   for (let i = 0; i < transformations.length; i++) {

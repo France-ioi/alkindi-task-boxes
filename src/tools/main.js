@@ -13,6 +13,7 @@ function makeSvgConfg (bits, numTransforms) {
   const space_transform = 14;
   const width_input = 35;
   const width_arrow = 30;
+  const width_score = 20;
 
 
   // rect
@@ -38,7 +39,7 @@ function makeSvgConfg (bits, numTransforms) {
 
   // svg width, height
   const total_height = (2 * xy_margin) + rect.height;
-  const total_width = (2 * xy_margin) + x + width_input - space_transform;
+  const total_width = (2 * xy_margin) + x + width_input - space_transform + width_score;
 
 
   let connect_y = xy_margin + rect_extra;
@@ -74,6 +75,7 @@ function makeSvgConfg (bits, numTransforms) {
     rect_extra,
     rect_width,
     xy_margin,
+    width_score,
     circle_radius,
     space_transform,
     box_extra,
@@ -89,6 +91,8 @@ function makeSvgConfg (bits, numTransforms) {
 export function MainSelector (state) {
   const {
     taskData: {bits},
+    scores,
+    totalScore,
     transformations,
     permutation,
     highlights,
@@ -102,6 +106,8 @@ export function MainSelector (state) {
 
   return {
     bits,
+    scores,
+    totalScore,
     transformations,
     permutation,
     highlights,
@@ -114,6 +120,29 @@ export function MainSelector (state) {
     transformInputChanged,
     transformArrowSelected,
   };
+}
+
+class ScoresView extends React.PureComponent {
+  render () {
+    const {scores, config} = this.props;
+    const {y_pos, xy_margin, width} = config;
+    const text = [];
+    for (let i = 0; i < scores.length; i++) {
+      text.push(<text
+        x={width - xy_margin}
+        y={y_pos[i] + 6}
+        fontSize="15px"
+        textAnchor="middle">
+        {scores[i]}
+      </text >);
+    }
+
+    return (
+      <g>
+        {text}
+      </g>
+    );
+  }
 }
 
 class Titles extends React.PureComponent {
@@ -165,11 +194,14 @@ export class MainView extends React.Component {
       transformations,
       permutation,
       highlights,
+      affected,
       boxes,
       arrow,
       inputs,
       outputs,
-      selected
+      selected,
+      scores,
+      totalScore,
     } = this.props;
 
     const transformationData = [];
@@ -204,6 +236,7 @@ export class MainView extends React.Component {
                   index,
                   type,
                   highlights,
+                  affected,
                   selected: selected === index,
                   data: data,
                   config: this.state.config,
@@ -214,7 +247,11 @@ export class MainView extends React.Component {
               })
             }
             <OutputsSvg config={config} outputs={outputs} />
+            <ScoresView config={config} scores={scores} />
           </svg>
+          <div className="total_score">
+            <h5>{`Score total : ${totalScore}`}</h5>
+          </div>
         </div>
       </div>
     );

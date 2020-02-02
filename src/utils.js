@@ -1,142 +1,112 @@
 
-import update from 'immutability-helper';
 
-
-export function selectTaskData (state) {
-  const {taskData: {alphabet, config: {numMessages}, messages}, messageIndex} = state;
-  const {cipherText, hints, frequencies} = messages[messageIndex];
-  return {alphabet, numMessages, messageIndex, cipherText, hints, frequencies};
-}
-
-
-
-/* SUBSTITUTION functions */
-
-
-export function makeSubstitution (alphabet) {
-  const size = alphabet.length;
-  const cells = alphabet.split('').map(function (c, rank) {
-    return {rank, rotating: c, editable: null, locked: false, conflict: false};
-  });
-  const nullPerm = new Array(size).fill(-1);
-  return {alphabet, size, cells, forward: nullPerm, backward: nullPerm};
-}
-
-export function dumpSubstitutions (alphabet, substitutions) {
-  return substitutions.map(substitution =>
-    substitution.cells.map(({editable, locked}) =>
-      [alphabet.indexOf(editable), locked ? 1 : 0]));
-}
-
-export function loadSubstitutions (alphabet, hints, substitutionDumps) {
-  const allHints = hints.filter(hint => hint.type === 'type_3');
-  return substitutionDumps.map((cells, substitutionIndex) => {
-    const $cells = [];
-    cells.forEach((cell, cellIndex) => {
-      /* Locking information is not included in the answer. */
-      if (typeof cell === 'number') cell = [cell, 0];
-      const [rank, locked] = cell;
-      $cells[cellIndex] = {
-        editable: {$set: rank === -1 ? null : alphabet[rank]},
-        locked: {$set: locked !== 0},
-      };
-    });
-    hints.forEach(({messageIndex: i, cellRank: j, symbol, type}) => {
-      if (substitutionIndex === i && type !== 'type_3') {
-        $cells[j] = {
-          editable: {$set: symbol},
-          hint: {$set: true},
-        };
-      }
-    });
-    allHints.forEach(({messageIndex: i, key}) => {
-      if (substitutionIndex === i) {
-        key.split('').forEach((symbol, j) => {
-          $cells[j] = {
-            editable: {$set: symbol},
-            hint: {$set: true},
-          };
-        });
-      }
-    });
-    let substitution = makeSubstitution(alphabet);
-    substitution = update(substitution, {cells: $cells});
-    substitution = markSubstitutionConflicts(updatePerms(substitution));
-    return substitution;
-  });
-}
-
-export function editSubstitutionCell (substitution, rank, symbol) {
-  substitution = update(substitution, {cells: {[rank]: {editable: {$set: symbol}}}});
-  return updatePerms(markSubstitutionConflicts(substitution));
-}
-
-export function lockSubstitutionCell (substitution, rank, locked) {
-  return update(substitution, {cells: {[rank]: {locked: {$set: locked}}}});
-}
-
-function markSubstitutionConflicts (substitution) {
-  const counts = new Map();
-  const changes = {};
-  for (let {rank, editable, conflict} of substitution.cells) {
-    if (conflict) {
-      changes[rank] = {conflict: {$set: false}};
-    }
-    if (editable !== null) {
-      if (!counts.has(editable)) {
-        counts.set(editable, [rank]);
-      } else {
-        counts.get(editable).push(rank);
-      }
-    }
+function applyPermutation (inputs, permutation) {
+  var result = [];
+  for (var iInput = 0; iInput < inputs.length; iInput++) {
+    result[permutation[iInput]] = inputs[iInput];
   }
-  for (let ranks of counts.values()) {
-    if (ranks.length > 1) {
-      for (let rank of ranks) {
-        changes[rank] = {conflict: {$set: true}};
-      }
-    }
-  }
-  return update(substitution, {cells: changes});
-}
-
-export function updatePerms (substitution) {
-  const {size, alphabet, cells} = substitution;
-  const backward = new Array(size).fill(-1);
-  for (let cell of cells) {
-    if (cell.editable !== null && !cell.conflict) {
-      const source = alphabet.indexOf(cell.editable);
-      backward[cell.rank] = source;
-    }
-  }
-  return {...substitution, backward};
-}
-
-export function applySubstitutions (substitutions, position, rank) {
-  const result = {rank, locks: 0, trace: []};
-  applySubstitution(substitutions[position], result);
   return result;
 }
 
-export function wrapAround (value, mod) {
-  return ((value % mod) + mod) % mod;
-}
-
-export function applySubstitution (substitution, result) {
-  let rank = result.rank, cell;
-  cell = substitution.cells[rank];
-  rank = substitution.backward[rank];
-  result.rank = rank;
-  if (cell) {
-    result.trace.push(cell);
-    if (cell.locked) {
-      result.locked = true;
+function applyBoxes (inputs, boxes) {
+  var result = [];
+  var nbTriplets = inputs.length / 3;
+  for (var iTriplet = 0; iTriplet < nbTriplets; iTriplet++) {
+    var binaryInput = 0;
+    for (var iInput = 2; iInput >= 0; iInput--) {
+      binaryInput *= 2;
+      binaryInput += inputs[iTriplet * 3 + iInput];
     }
-    if (cell.hint) {
-      result.isHint = true;
-    }
-    if (cell.collision) {
-      result.collision = true;
+    var binaryOutput = boxes[binaryInput];
+    for (var iOutput = 0; iOutput < 3; iOutput++) {
+      var digit = binaryOutput % 2;
+      result[iTriplet * 3 + iOutput] = digit;
+      if (digit == 1) {
+        binaryOutput--;
+      }
+      binaryOutput /= 2;
     }
   }
+  return result;
+}
+
+function applyTransformations (transformations, permutations, boxes, inputs) {
+  var result = inputs;
+  for (var iTransf = 0; iTransf < transformations.length; iTransf++) {
+    var transf = transformations[iTransf].type;
+    if (transf == 'permutation') {
+      result = applyPermutation(result, permutations[iTransf]);
+    } else {
+      result = applyBoxes(result, boxes);
+    }
+  }
+  return result;
+}
+
+function computeImpact (transformations, permutations, boxes, inputs, selectedInput) {
+  var outputs1 = applyTransformations(transformations, permutations, boxes, inputs);
+  inputs[selectedInput] = 1 - inputs[selectedInput];
+  var outputs2 = applyTransformations(transformations, permutations, boxes, inputs);
+  inputs[selectedInput] = 1 - inputs[selectedInput];
+  var nbDifferences = 0;
+  var impactedOutputs = [];
+  for (var iOutput = 0; iOutput < outputs1.length; iOutput++) {
+    if (outputs1[iOutput] != outputs2[iOutput]) {
+      nbDifferences++;
+      impactedOutputs[iOutput] = 1;
+    } else {
+      impactedOutputs[iOutput] = 0;
+    }
+  }
+  return {
+    impactedOutputs: impactedOutputs,
+    nbDiff: nbDifferences
+  };
+}
+
+function genRandomInput (nbInputs) {
+  var inputs = [];
+  for (var iInput = 0; iInput < nbInputs; iInput++) {
+    inputs[iInput] = Math.floor(Math.random() * 2);
+  }
+  return inputs;
+}
+
+function computeWorstCase (transformations, permutations, boxes, selectedInput) {
+  var nbAttempts = 200;
+  var worstInputs = [];
+  var nbInputs = permutations[0].length;
+  var minImpact = {nbDiff: 1000};
+  for (var iAttempt = 0; iAttempt < nbAttempts; iAttempt++) {
+    var inputs = genRandomInput(nbInputs);
+    var impact = computeImpact(transformations, permutations, boxes, inputs, selectedInput);
+    //console.log("diff : " + impact.nbDiff + " for " + impact.impactedOutputs);
+    if (impact.nbDiff < minImpact.nbDiff) {
+      worstInputs = inputs;
+      minImpact = impact;
+    }
+  }
+  //console.log("SelectedInput : " + selectedInput);
+  //console.log("Worst input : " + worstInputs);
+  //console.log("Impacted outputs : " + minImpact.impactedOutputs);
+  return {
+    inputs: worstInputs,
+    impactedOutputs: minImpact.impactedOutputs,
+    nbDiff: minImpact.nbDiff
+  };
+}
+
+export function computeScores (transformations, permutations, boxes) {
+  var nbInputs = permutations[0].length;
+  var scores = [];
+  for (let iOutput = 0; iOutput < nbInputs; iOutput++) {
+    scores[iOutput] = 0;
+  }
+  for (let iInput = 0; iInput < nbInputs; iInput++) {
+    var worst = computeWorstCase(transformations, permutations, boxes, iInput);
+    for (var iOutput = 0; iOutput < nbInputs; iOutput++) {
+      scores[iOutput] += worst.impactedOutputs[iOutput];
+    }
+  }
+  return scores;
 }

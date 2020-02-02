@@ -19,6 +19,16 @@
   text-align: center;
 }
 
+.total_score {
+  position: relative;
+  float: right;
+  font-size: 18px;
+}
+
+.total_score > h5 {
+  font-size: 16px;
+}
+
 #main_svg_wrapper {
   display: block;
   margin-top: 50px;
