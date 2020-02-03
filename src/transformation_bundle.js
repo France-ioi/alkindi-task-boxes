@@ -164,13 +164,9 @@ function transformDataChangedReducer (state, {option_type, data}) {
 
 function transformInputChangedReducer (state, {position}) {
   const {inputMode} = state;
-  if (inputMode === 'auto') {
-    return state;
-  }
-
   return updateScores(updateHighlights(update(state, {
     inputs: {[position]: {$apply: (bit) => bit ^ 1}},
-    arrow: {$apply: (value) => value === position ? -1 : value}
+    arrow: {$apply: (value) => (value === position || inputMode === 'auto') ? -1 : value}
   })));
 }
 
@@ -266,7 +262,7 @@ function updateHighlights (state) {
       newOutput = applyPermutation(bits, prevOutput, perm);
       newOutputFlipped = applyPermutation(bits, prevOutputFlipped, perm);
     } else {
-      newOutput = applyBoxes(prevOutput, boxes);
+      newOutput = applyBoxes([...prevOutput], boxes);
       newOutputFlipped = applyBoxes(prevOutputFlipped, boxes);
       highlights[i] = [[...prevOutput], newOutput];
       let newDifferences = [];

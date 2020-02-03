@@ -1,7 +1,6 @@
 import React from 'react';
-import {range} from 'range';
 import update from 'immutability-helper';
-
+import {Button} from 'react-bootstrap';
 
 function makeBoxSvgs (bits) {
   const rect_extra = 10, rect_width = 40;
@@ -149,6 +148,7 @@ export default class BoxesTool extends React.Component {
   constructor (props) {
     super(props);
     this.config = makeBoxSvgs(3);
+    this.history = [];
   }
 
   render () {
@@ -161,12 +161,34 @@ export default class BoxesTool extends React.Component {
             <Box key={i} input={i} output={output} config={this.config} onUpdate={this.onBoxUpdate} />
           )
         }
+         <div className="undo_wrapper">
+          <Button variant="outline-primary" onClick={this.onUndo} disabled={this.history.length === 0}>Annuler une étape</Button>
+        </div>
       </div>
     );
   }
 
+  onUndo = () => {
+    const {onDataChanged} = this.props;
+    const data = this.history.pop();
+    if (data) {
+      this.setState(function () {
+        return {
+          select: {
+            input: -1,
+            output: -1,
+          }
+        };
+      }, () => {
+        onDataChanged(data);
+      });
+    }
+  }
+
+
   onBoxUpdate = ([input, output]) => {
     const {data, onDataChanged} = this.props;
+    this.history.push([...data]);
     const newData = update(data, {$splice: [[input, 1, output]]});
     onDataChanged(newData);
 

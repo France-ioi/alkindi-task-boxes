@@ -26,6 +26,7 @@ export default class Titles extends React.PureComponent {
         <h4 style={{...styles, left: `${x_pos[1][0]}px`}}>Entrees</h4>
         {letters}
         <h4 style={{...styles, left: `${x_pos[x_pos.length - 1][0]}px`}}>Sorties</h4>
+        <h4 style={{...styles, left: `${x_pos[x_pos.length - 1][1]}px`}}>Scores</h4>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import React from 'react';
-import {range} from 'range';
+import {Button} from 'react-bootstrap';
+
 
 function makePermutationSvgCordinations ({bits, lockedInputs, lockedOutputs}) {
   const rect_extra = 20, rect_width = 149;
@@ -152,6 +153,7 @@ export default class PermutaionTool extends React.PureComponent {
   constructor (props) {
     super(props);
     this.config = makePermutationSvgCordinations(props);
+    this.history = [];
   }
 
   render () {
@@ -181,6 +183,9 @@ export default class PermutaionTool extends React.PureComponent {
           <g className="connects_lines">{perm_lines}</g>
           <g className="lock_perm">{outputsLocks}</g>
         </svg>
+        <div className="undo_wrapper">
+          <Button variant="outline-primary" onClick={this.onUndo} disabled={this.history.length === 0}>Annuler une étape</Button>
+        </div>
       </div>
     );
   }
@@ -193,6 +198,7 @@ export default class PermutaionTool extends React.PureComponent {
     const isInput = input !== -1;
     const isOutput = output !== -1;
     if (isInput && isOutput) {
+      this.history.push([...data]);
       [data[data.indexOf(output)], data[input]] = [data[input], data[data.indexOf(output)]];
       setTimeout(() => {
         this.setState(function () {
@@ -204,6 +210,23 @@ export default class PermutaionTool extends React.PureComponent {
           };
         }, () => onDataChanged([...data]));
       }, 300);
+    }
+  }
+
+  onUndo = () => {
+    const {onDataChanged} = this.props;
+    const data = this.history.pop();
+    if (data) {
+      this.setState(function () {
+        return {
+          select: {
+            input: -1,
+            output: -1,
+          }
+        };
+      }, () => {
+        onDataChanged(data);
+      });
     }
   }
 

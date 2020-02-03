@@ -3,13 +3,18 @@
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-  width: 820px;
+  width: 830px;
+}
+
+.task-bar {
+  margin: 0 !important;
+  text-align: end;
 }
 
 .main {
   display: inline-block;
   width: 65%;
-  min-height: 600px;
+  min-height: 550px;
 }
 
 .titles {
@@ -19,9 +24,14 @@
   text-align: center;
 }
 
+.titles h4 {
+  font-size: medium;
+}
+
+
 .mode_radio {
   width: 201px;
-  margin: 45px auto 0px;
+  margin: 33px auto 0px;
 }
 
 .total_score {
@@ -150,8 +160,13 @@
 }
 
 .permutaion_tool svg {
-  position: absolute;
   width: 95%;
+}
+
+.undo_wrapper {
+  text-align: center;
+  clear: both;
+  padding: 10px;
 }
 
 .permutaion_tool svg .lock_perm text {
@@ -196,10 +211,11 @@
   width: 40%;
   min-height: 50px;
   margin-top: 5px;
+  margin-left: 5%;
 }
 
 .box_item:nth-child(odd) {
-  margin-right: 10%;
+  margin-right: 5%;
   margin-left: 10%;
 }
 
